@@ -5,6 +5,9 @@ on:
     - cron: "0,30 * * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   triage:
     runs-on: ubuntu-latest
@@ -20,6 +23,13 @@ jobs:
       - name: Install dependencies
         run: pip install requests reportlab
 
+      - name: Restore database
+        uses: actions/cache@v4
+        with:
+          path: maintenance.db
+          key: maintenance-db-${{ github.run_id }}
+          restore-keys: maintenance-db-
+
       - name: Run maintenance triage agent
         env:
           DOORLOOP_API_KEY:    ${{ secrets.DOORLOOP_API_KEY }}
@@ -27,13 +37,31 @@ jobs:
           GMAIL_ADDRESS:       ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD:  ${{ secrets.GMAIL_APP_PASSWORD }}
           MANAGER_EMAIL:       ${{ secrets.MANAGER_EMAIL }}
+          DB_PATH:             maintenance.db
         run: python maintenance_agent.py
+
+      - name: Commit data.json to repo
+        run: |
+          git config user.name "Synced Agent"
+          git config user.email "agent@synced.ai"
+          git add data.json || true
+          git diff --staged --quiet || git commit -m "chore: update maintenance data [skip ci]"
+          git push || true
+
+      - name: Save database
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: maintenance.db
+          key: maintenance-db-${{ github.run_id }}
 
       - name: Upload audit artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: maintenance-run-${{ github.run_id }}
-          path: maintenance.db
+          path: |
+            maintenance.db
+            data.json
           if-no-files-found: ignore
           retention-days: 90
