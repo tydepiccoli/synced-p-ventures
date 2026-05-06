@@ -322,7 +322,7 @@ body{display:flex;flex-direction:column;overflow:hidden}
 
 <script>
 const DL_KEY='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiQVBJIiwiaWQiOiI2OWZiNjNkMzJhNTY5ODA2NWZjYWMwMDIiLCJleHAiOjIwOTM0NDI3NzF9.bAsq3PTzU5Smnbm-D2diFAyJ2jXS6oT0uQL_e2UKFuU';
-const DL='https://api.doorloop.com';
+const DL='https://corsproxy.io/?https://api.doorloop.com';
 const DLH={'Authorization':'Bearer '+DL_KEY,'Content-Type':'application/json'};
 const SF=['New Request','AI Reviewing','Need More Info','Waiting on Photos','Vendor Needed','Vendor Contacted','Scheduled','In Progress','Waiting on Invoice','Owner Approval','Completed','Closed'];
 const DLS={'New Request':'open','AI Reviewing':'open','Need More Info':'open','Waiting on Photos':'open','Vendor Needed':'open','Vendor Contacted':'open','Scheduled':'open','In Progress':'inProgress','Waiting on Invoice':'inProgress','Owner Approval':'open','Completed':'completed','Closed':'completed'};
@@ -371,7 +371,7 @@ async function syncDoorLoop(){
   btn.disabled=true; btn.innerHTML='<div class="sdot"></div>Syncing...';
   document.getElementById('sync-status').textContent='Connecting to DoorLoop...';
   try{
-    const r=await fetch(DL+'/workOrders?status=open&pageSize=100',{headers:DLH});
+    const r=await fetch(DL+'/workOrders?status=open&pageSize=100',{headers:{...DLH,'x-requested-with':'XMLHttpRequest'}});
     if(!r.ok) throw new Error('HTTP '+r.status);
     const data=await r.json();
     const wos=data.data||[];
@@ -422,7 +422,7 @@ async function pushToDL(t){
   if(!t.doorloop_id||t.doorloop_id.startsWith('MANUAL')) return false;
   try{
     const r=await fetch(DL+'/workOrders/'+t.doorloop_id,{
-      method:'PATCH',headers:DLH,
+      method:'PATCH',headers:{...DLH,'x-requested-with':'XMLHttpRequest'},
       body:JSON.stringify({status:DLS[t.status]||'open',
         description:t.resolution_notes?t.issue_description+'\n\nResolution: '+t.resolution_notes:t.issue_description})
     });
