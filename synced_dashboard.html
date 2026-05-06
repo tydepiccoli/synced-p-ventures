@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Synced — Agent Terminal</title>
+<!-- SF Pro system font — pre-installed on all Apple devices -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+:root{
+  --f:-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;
+  --bg:#fafafa;--bg2:#fff;--bg3:#f4f4f4;--bg4:#ebebeb;
+  --b1:rgba(0,0,0,.07);--b2:rgba(0,0,0,.12);--b3:rgba(0,0,0,.18);
+  --t1:#000;--t2:#1a1a1a;--t3:#333;
+  --g:#1a8a3a;--gd:rgba(26,138,58,.08);--gb:rgba(26,138,58,.2);
+  --bl:#0051cc;--bld:rgba(0,81,204,.07);--blb:rgba(0,81,204,.18);
+  --rd:#cc1a1a;--rdd:rgba(204,26,26,.07);
+  --am:#8a5a00;--amd:rgba(138,90,0,.08);
+  --r:10px;--rsm:6px;--rlg:14px;
+}
+html,body{height:100%;font-family:var(--f);font-size:13px;background:var(--bg);color:var(--t1)}
+body{display:flex;flex-direction:column;overflow:hidden}
+
+/* NAV */
+.nav{height:48px;flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--b2);display:flex;align-items:center;padding:0 18px;gap:10px}
+.brand{display:flex;align-items:center;gap:8px;margin-right:6px}
+.brand svg{width:24px;height:24px;flex-shrink:0}
+.brand-name{font-family:var(--f);font-size:14px;font-weight:700;letter-spacing:-.3px;color:var(--t1)}
+.bdot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:blink 2.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.sep{width:1px;height:16px;background:var(--b2)}
+.npill{font-family:var(--f);font-size:11px;font-weight:600;color:var(--t2);background:transparent;border:1px solid var(--b2);border-radius:4px;padding:3px 10px;cursor:pointer;transition:background .1s,color .1s}
+.npill:hover{background:var(--bg3);color:var(--t1)}
+.npill.on{background:var(--t1);color:#fff;border-color:var(--t1)}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.nlive{font-family:var(--f);font-size:10px;font-weight:600;color:var(--g);background:var(--gd);border:1px solid var(--gb);border-radius:4px;padding:3px 9px;display:flex;align-items:center;gap:4px;letter-spacing:.02em}
+.nlive-dot{width:4px;height:4px;border-radius:50%;background:var(--g);animation:blink 1.8s infinite}
+.av{width:26px;height:26px;border-radius:50%;background:var(--t1);color:#fff;font-family:var(--f);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;letter-spacing:.5px;cursor:pointer}
+
+/* LAYOUT */
+.wrap{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+.sb{width:200px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--b1);padding:12px 0;display:flex;flex-direction:column;gap:1px}
+.sb-sec{font-family:var(--f);padding:10px 14px 4px;font-size:9px;font-weight:700;color:var(--t3);letter-spacing:.1em;text-transform:uppercase}
+.sb-row{display:flex;align-items:center;gap:8px;margin:1px 6px;padding:6px 9px;border-radius:var(--rsm);cursor:pointer;font-family:var(--f);font-size:12px;font-weight:400;color:var(--t2);transition:background .1s;border:1px solid transparent}
+.sb-row:hover{background:var(--bg3);color:var(--t1)}
+.sb-row.on{background:var(--bg4);color:var(--t1);font-weight:600}
+.sb-ico{width:13px;height:13px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8}
+.sb-tag{margin-left:auto;font-family:var(--f);font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--gd);color:var(--g);border:1px solid var(--gb)}
+.sb-sp{height:4px}
+.sb-co{display:flex;align-items:center;gap:8px;margin:1px 6px;padding:6px 9px;border-radius:var(--rsm);cursor:pointer;font-family:var(--f);font-size:12px;color:var(--t2);transition:background .1s}
+.sb-co:hover{background:var(--bg3);color:var(--t1)}
+.sb-co.on{background:var(--bg4);color:var(--t1);font-weight:600}
+.co-ico{width:18px;height:18px;border-radius:3px;background:var(--t1);display:flex;align-items:center;justify-content:center;font-family:var(--f);font-size:8px;font-weight:800;color:#fff;flex-shrink:0}
+.sb-add{display:flex;align-items:center;gap:8px;margin:1px 6px;padding:6px 9px;border-radius:var(--rsm);cursor:pointer;font-family:var(--f);font-size:11px;color:var(--t3);border:1px dashed var(--b2);transition:all .1s}
+.sb-add:hover{color:var(--t2);border-color:var(--b3)}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:24px 26px;background:var(--bg)}
+.page{display:none}.page.on{display:block}
+
+/* PH */
+.ph{margin-bottom:22px}
+.ph h1{font-family:var(--f);font-size:20px;font-weight:700;letter-spacing:-.4px;color:var(--t1);margin-bottom:2px}
+.ph p{font-family:var(--f);font-size:11px;color:var(--t3);font-weight:400}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
+.sc{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);padding:14px 16px}
+.sc-l{font-family:var(--f);font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
+.sc-v{font-family:var(--f);font-size:24px;font-weight:300;letter-spacing:-.5px;line-height:1;color:var(--t1)}
+.sc-v.g{color:var(--g)}.sc-v.b{color:var(--bl)}.sc-v.a{color:var(--am)}
+.sc-s{font-family:var(--f);font-size:10px;color:var(--t3);margin-top:4px}
+
+/* SEC */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.sh-l{font-family:var(--f);font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.09em}
+.sh-a{font-family:var(--f);font-size:11px;font-weight:600;color:var(--bl);cursor:pointer}
+
+/* AGENTS */
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:22px}
+.ac{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--rlg);padding:18px;cursor:pointer;transition:border-color .1s,transform .1s;will-change:transform}
+.ac:hover{border-color:var(--b2);transform:translateY(-1px)}
+.ac.live{border-color:rgba(26,138,58,.3)}
+.ac.ghost{opacity:.5;border-style:dashed}
+.ac-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:13px}
+.ac-n{font-family:var(--f);font-size:13px;font-weight:700;letter-spacing:-.2px;color:var(--t1);margin-bottom:2px}
+.ac-s{font-family:var(--f);font-size:10px;color:var(--t3)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-family:var(--f);font-size:10px;font-weight:700;border-radius:4px;padding:3px 8px;border:1px solid}
+.pill.live{color:var(--g);border-color:var(--gb);background:var(--gd)}
+.pill.idle{color:var(--t3);border-color:var(--b1);background:var(--bg3)}
+.pdot{width:4px;height:4px;border-radius:50%;background:currentColor}
+.pill.live .pdot{animation:blink 1.8s infinite}
+.ac-g{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}
+.al{font-family:var(--f);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1px}
+.av2{font-family:var(--f);font-size:11px;color:var(--t2);font-weight:500}
+.av2.ok{color:var(--g)}
+.ac-b{display:flex;gap:6px;flex-wrap:wrap}
+.btn{font-family:var(--f);font-size:11px;font-weight:600;padding:5px 12px;border-radius:var(--rsm);border:1px solid var(--b2);background:var(--bg3);color:var(--t1);cursor:pointer;transition:background .1s}
+.btn:hover{background:var(--bg4)}
+.btn:active{transform:scale(.97)}
+.btn.dk{background:var(--t1);color:#fff;border-color:var(--t1)}
+.btn.dk:hover{background:#222}
+.btn.gn{background:var(--gd);color:var(--g);border-color:var(--gb)}
+.btn.gn:hover{background:rgba(26,138,58,.14)}
+.btn.bl{background:var(--bld);color:var(--bl);border-color:var(--blb)}
+
+/* CONN */
+.cbox{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--rlg);overflow:hidden;margin-bottom:22px}
+.crow{display:flex;align-items:center;padding:10px 18px;border-bottom:1px solid var(--b1);gap:10px;transition:background .1s}
+.crow:last-child{border-bottom:none}.crow:hover{background:var(--bg3)}.crow.dim{opacity:.35}
+.cf{font-family:var(--f);font-size:12px;font-weight:600;color:var(--t1);width:165px;flex-shrink:0}
+.cl{flex:1;display:flex;align-items:center;gap:6px}
+.cd{flex:1;height:1px;background:repeating-linear-gradient(90deg,var(--b2) 0,var(--b2) 3px,transparent 3px,transparent 8px)}
+.cv{font-family:var(--f);font-size:10px;font-weight:600;color:var(--t3);white-space:nowrap}
+.ca{font-family:var(--f);font-size:12px;color:var(--t2);width:190px;flex-shrink:0;text-align:right;font-weight:500}
+.ctag{font-family:var(--f);font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;flex-shrink:0;letter-spacing:.03em}
+.ctag.live{background:var(--gd);color:var(--g);border:1px solid var(--gb)}
+.ctag.plan{background:var(--bg3);color:var(--t3);border:1px solid var(--b1)}
+
+/* TERMINAL */
+.term{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--rlg);overflow:hidden;margin-bottom:22px}
+.th2{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--b1);background:var(--bg3)}
+.tdots{display:flex;gap:5px}
+.td{width:10px;height:10px;border-radius:50%}
+.td-r{background:#ff5f57}.td-y{background:#ffbd2e}.td-g{background:#28ca42}
+.tt{font-family:var(--f);font-size:10px;font-weight:600;color:var(--t3);flex:1;text-align:center;letter-spacing:.02em}
+.tb{padding:12px 16px;font-family:var(--f);font-size:11px;line-height:1.8;max-height:190px;overflow-y:auto;background:var(--bg2)}
+.ll{display:flex;gap:9px;align-items:baseline}
+.lt{color:var(--t3);flex-shrink:0;font-size:10px;min-width:54px}
+.lk{flex-shrink:0;font-size:8px;font-weight:800;padding:1px 5px;border-radius:2px;letter-spacing:.05em}
+.lk.ok{background:var(--gd);color:var(--g)}.lk.info{background:var(--bld);color:var(--bl)}
+.lk.warn{background:var(--amd);color:var(--am)}.lk.err{background:var(--rdd);color:var(--rd)}
+.lm{color:var(--t2);font-size:11px}.lm b{color:var(--t1);font-weight:700}
+
+/* MODAL */
+.mwrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.mwrap.show{display:flex}
+.modal{background:var(--bg2);border-radius:var(--rlg);padding:24px;width:500px;max-width:92vw;max-height:82vh;overflow-y:auto;border:1px solid var(--b2)}
+.modal h2{font-family:var(--f);font-size:16px;font-weight:700;letter-spacing:-.3px;color:var(--t1);margin-bottom:3px}
+.modal-sub{font-family:var(--f);font-size:11px;color:var(--t3);margin-bottom:16px}
+.mc{float:right;background:var(--bg3);border:1px solid var(--b1);width:24px;height:24px;border-radius:50%;cursor:pointer;font-family:var(--f);font-size:15px;color:var(--t2);display:flex;align-items:center;justify-content:center}
+.mc:hover{background:var(--bg4)}
+.mr{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--b1);font-family:var(--f);font-size:12px}
+.mr:last-of-type{border-bottom:none}
+.mr-l{color:var(--t3);font-weight:500}
+.mr-v{font-family:var(--f);font-size:11px;font-weight:700;color:var(--t1)}
+.mr-v.g{color:var(--g)}.mr-v.r{color:var(--rd)}.mr-v.a{color:var(--am)}.mr-v.b{color:var(--bl)}
+.mbtns{display:flex;gap:7px;margin-top:16px}
+.desc-box{background:var(--bg3);border:1px solid var(--b1);border-radius:var(--rsm);padding:14px;margin:14px 0;font-family:var(--f);font-size:12px;color:var(--t2);line-height:1.7}
+
+/* LOG FILTERS */
+.lf{display:flex;gap:7px;margin-bottom:14px}
+.lfb{font-family:var(--f);font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid var(--b2);background:transparent;color:var(--t2);cursor:pointer;transition:all .1s}
+.lfb:hover{background:var(--bg3)}.lfb.on{background:var(--t1);color:#fff;border-color:var(--t1)}
+
+/* ANALYTICS */
+.ach{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:22px}
+.anc{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);padding:16px}
+.an-t{font-family:var(--f);font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:11px}
+.br{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.bl2{font-family:var(--f);font-size:11px;font-weight:600;color:var(--t2);width:75px;flex-shrink:0}
+.bb{flex:1;height:5px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.bf{height:100%;border-radius:2px}
+.bn{font-family:var(--f);font-size:10px;font-weight:700;color:var(--t1);width:28px;text-align:right;flex-shrink:0}
+
+/* SETTINGS */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.setc{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);padding:16px}
+.set-t{font-family:var(--f);font-size:12px;font-weight:700;color:var(--t1);margin-bottom:12px}
+.sr{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b1);font-family:var(--f);font-size:12px}
+.sr:last-child{border-bottom:none}
+.sr-l{color:var(--t3);font-weight:500}
+.sr-v{font-family:var(--f);font-size:10px;font-weight:700;color:var(--t1);background:var(--bg3);padding:2px 8px;border-radius:3px;border:1px solid var(--b1)}
+.tog{width:32px;height:18px;border-radius:9px;background:var(--g);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.tog.off{background:var(--b2)}
+.tog::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.tog.on::after{transform:translateX(14px)}
+
+/* TENANT ROW */
+.tr2{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--b1);font-family:var(--f);font-size:12px}
+.tr2:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="6" fill="#000"/>
+      <circle cx="16" cy="16" r="11.5" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+      <circle cx="16" cy="16" r="7" stroke="rgba(255,255,255,.18)" stroke-width="1"/>
+      <circle cx="16" cy="16" r="3" stroke="rgba(255,255,255,.3)" stroke-width="1.2"/>
+      <circle cx="16" cy="16" r="1.4" fill="white"/>
+      <circle cx="16" cy="4.5" r="1.4" fill="white" opacity=".9"/>
+      <circle cx="27" cy="21.5" r="1.4" fill="white" opacity=".7"/>
+      <circle cx="5" cy="21.5" r="1.4" fill="white" opacity=".7"/>
+      <line x1="16" y1="5.9" x2="16" y2="13" stroke="rgba(255,255,255,.2)" stroke-width=".9"/>
+      <line x1="25.8" y1="20.8" x2="19.8" y2="17.4" stroke="rgba(255,255,255,.15)" stroke-width=".9"/>
+      <line x1="6.2" y1="20.8" x2="12.2" y2="17.4" stroke="rgba(255,255,255,.15)" stroke-width=".9"/>
+    </svg>
+    <span class="brand-name">Synced</span>
+    <div class="bdot"></div>
+  </div>
+  <div class="sep"></div>
+  <button class="npill on" onclick="switchCo(this,'pv')">P Ventures</button>
+  <button class="npill" onclick="addCo()">+ Add company</button>
+  <div class="nav-r">
+    <div class="nlive"><div class="nlive-dot"></div><span id="nlive-t">2 agents live</span></div>
+    <div class="av">TP</div>
+  </div>
+</nav>
+
+<div class="wrap">
+<aside class="sb">
+  <div class="sb-sec">Workspace</div>
+  <div class="sb-row on" onclick="nav('dashboard',this)"><svg class="sb-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
+  <div class="sb-row" onclick="nav('agents',this)"><svg class="sb-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>Agents<span class="sb-tag">2 live</span></div>
+  <div class="sb-row" onclick="nav('logs',this)"><svg class="sb-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Logs</div>
+  <div class="sb-row" onclick="nav('analytics',this)"><svg class="sb-ico" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Analytics</div>
+  <div class="sb-sp"></div>
+  <div class="sb-sec">Companies</div>
+  <div class="sb-co on" id="co-pv"><div class="co-ico">PV</div>P Ventures<span class="sb-tag" style="margin-left:auto">live</span></div>
+  <div class="sb-sp"></div>
+  <div class="sb-add" onclick="addCo()"><svg style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Add company</div>
+  <div class="sb-sp"></div>
+  <div class="sb-sec">System</div>
+  <div class="sb-row" onclick="nav('settings',this)"><svg class="sb-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1 1 4.93 19.07"/></svg>Settings</div>
+</aside>
+
+<main class="main">
+
+<!-- DASHBOARD -->
+<div class="page on" id="page-dashboard">
+  <div class="ph"><h1>Agent Terminal</h1><p>P Ventures · Property Management · GitHub Actions · Runs daily at 9:00am ET</p></div>
+  <div class="stats">
+    <div class="sc"><div class="sc-l">Active Agents</div><div class="sc-v g">2</div><div class="sc-s">of 2 deployed</div></div>
+    <div class="sc"><div class="sc-l">Last Run</div><div class="sc-v b" style="font-size:16px;font-weight:500;margin-top:3px">Today 9:00am</div><div class="sc-s">✓ success · 31s</div></div>
+    <div class="sc"><div class="sc-l">Notices Sent</div><div class="sc-v a">0</div><div class="sc-s">this month</div></div>
+    <div class="sc"><div class="sc-l">Next Run</div><div class="sc-v" style="font-size:16px;font-weight:500;margin-top:3px;color:var(--t2)">Tomorrow 9:00am</div><div class="sc-s">automatic · daily</div></div>
+  </div>
+  <div class="sh"><div class="sh-l">Agents</div><div class="sh-a" onclick="nav('agents')">View all →</div></div>
+  <div class="agrid">
+    <div class="ac live" onclick="openAgent()">
+      <div class="ac-top"><div><div class="ac-n">Rent Notice Agent</div><div class="ac-s">P Ventures · Property Management</div></div><div class="pill live"><div class="pdot"></div>LIVE</div></div>
+      <div class="ac-g">
+        <div><div class="al">Trigger</div><div class="av2">Daily 9:00am ET</div></div>
+        <div><div class="al">Last run</div><div class="av2 ok">Today · ✓ ok</div></div>
+        <div><div class="al">Source</div><div class="av2">DoorLoop API</div></div>
+        <div><div class="al">Output</div><div class="av2">PDF + Gmail</div></div>
+      </div>
+      <div class="ac-b">
+        <button class="btn dk" onclick="event.stopPropagation();runAgent()">Run now</button>
+        <button class="btn" onclick="event.stopPropagation();nav('logs')">View logs</button>
+        <button class="btn gn" onclick="event.stopPropagation();checkTenants()">Check tenants</button>
+      </div>
+    </div>
+    <div class="ac live" onclick="window.open('maintenance_dashboard.html','_blank')">
+      <div class="ac-top"><div><div class="ac-n">Maintenance Triage Agent</div><div class="ac-s">P Ventures · Auto-triages DoorLoop requests</div></div><div class="pill live"><div class="pdot"></div>LIVE</div></div>
+      <div class="ac-g">
+        <div><div class="al">Trigger</div><div class="av2">Every 30 min</div></div>
+        <div><div class="al">Last run</div><div class="av2 ok">Today · ✓ ok</div></div>
+        <div><div class="al">Source</div><div class="av2">DoorLoop API</div></div>
+        <div><div class="al">Output</div><div class="av2">Email + Tickets</div></div>
+      </div>
+      <div class="ac-b">
+        <button class="btn dk" onclick="event.stopPropagation();window.open('maintenance_dashboard.html','_blank')">Open dashboard</button>
+        <button class="btn gn" onclick="event.stopPropagation();openMaintStats()">View tickets</button>
+      </div>
+    </div>
+    <div class="ac ghost"><div class="ac-top"><div><div class="ac-n">Lease Renewal Agent</div><div class="ac-s">Not yet built</div></div><div class="pill idle"><div class="pdot"></div>IDLE</div></div><div class="ac-g"><div><div class="al">Trigger</div><div class="av2">60 days pre-expiry</div></div><div><div class="al">Output</div><div class="av2">Email + PDF</div></div></div><div class="ac-b"><button class="btn dk" onclick="buildAgent('lease')">Build this agent →</button></div></div>
+    <div class="ac ghost"><div class="ac-top"><div><div class="ac-n">Eviction Filing Agent</div><div class="ac-s">Not yet built</div></div><div class="pill idle"><div class="pdot"></div>IDLE</div></div><div class="ac-g"><div><div class="al">Trigger</div><div class="av2">Post-notice expiry</div></div><div><div class="al">Output</div><div class="av2">Attorney package</div></div></div><div class="ac-b"><button class="btn dk" onclick="buildAgent('eviction')">Build this agent →</button></div></div>
+    <div class="ac ghost"><div class="ac-top"><div><div class="ac-n">Maintenance Agent</div><div class="ac-s">Not yet built</div></div><div class="pill idle"><div class="pdot"></div>IDLE</div></div><div class="ac-g"><div><div class="al">Trigger</div><div class="av2">New DoorLoop request</div></div><div><div class="al">Output</div><div class="av2">Vendor dispatch</div></div></div><div class="ac-b"><button class="btn dk" onclick="buildAgent('maintenance')">Build this agent →</button></div></div>
+  </div>
+  <div class="sh"><div class="sh-l">Agent Communication</div></div>
+  <div class="cbox">
+    <div class="crow"><div class="cf">Rent Notice Agent</div><div class="cl"><div class="cd"></div><div class="cv">READS</div><div class="cd"></div><span style="color:var(--t3)">›</span></div><div class="ca">DoorLoop API</div><div class="ctag live">ACTIVE</div></div>
+    <div class="crow"><div class="cf">Rent Notice Agent</div><div class="cl"><div class="cd"></div><div class="cv">SENDS VIA</div><div class="cd"></div><span style="color:var(--t3)">›</span></div><div class="ca">Gmail</div><div class="ctag live">ACTIVE</div></div>
+    <div class="crow"><div class="cf">Maintenance Agent</div><div class="cl"><div class="cd"></div><div class="cv">READS</div><div class="cd"></div><span style="color:var(--t3)">›</span></div><div class="ca">DoorLoop Work Orders</div><div class="ctag live">ACTIVE</div></div>
+    <div class="crow"><div class="cf">Maintenance Agent</div><div class="cl"><div class="cd"></div><div class="cv">ALERTS VIA</div><div class="cd"></div><span style="color:var(--t3)">›</span></div><div class="ca">Gmail (tenant + you)</div><div class="ctag live">ACTIVE</div></div>
+    <div class="crow dim"><div class="cf">Rent Notice Agent</div><div class="cl"><div class="cd"></div><div class="cv">TRIGGERS</div><div class="cd"></div><span style="color:var(--t3)">›</span></div><div class="ca">Eviction Filing Agent</div><div class="ctag plan">PLANNED</div></div>
+    <div class="crow dim"><div class="cf">Lease Renewal Agent</div><div class="cl"><div class="cd"></div><div class="cv">READS</div><div class="cd"></div><span style="color:var(--t3)">›</span></div><div class="ca">DoorLoop API</div><div class="ctag plan">PLANNED</div></div>
+  </div>
+  <div class="sh"><div class="sh-l">Live Log</div><div class="sh-a" onclick="nav('logs')">Full log →</div></div>
+  <div class="term">
+    <div class="th2"><div class="tdots"><div class="td td-r"></div><div class="td td-y"></div><div class="td td-g"></div></div><div class="tt">p-ventures-rent-agent · main · run #1</div><button class="btn" style="font-size:10px;padding:2px 8px" onclick="nav('logs')">expand</button></div>
+    <div class="tb" id="tm"></div>
+  </div>
+</div>
+
+<!-- AGENTS -->
+<div class="page" id="page-agents">
+  <div class="ph"><h1>Agents</h1><p>All deployed and planned agents for P Ventures</p></div>
+  <div class="sh"><div class="sh-l">Live — 2 agents running</div><button class="btn dk" style="font-size:11px;padding:4px 12px" onclick="buildAgent('new')">+ New agent</button></div>
+  <div class="agrid" style="margin-bottom:22px">
+
+    <div class="ac live" onclick="openAgent()">
+      <div class="ac-top"><div><div class="ac-n">Rent Notice Agent</div><div class="ac-s">Checks DoorLoop daily · sends FL 3-day notice on day 9</div></div><div class="pill live"><div class="pdot"></div>LIVE</div></div>
+      <div class="ac-g">
+        <div><div class="al">Schedule</div><div class="av2">Daily 9:00am ET</div></div>
+        <div><div class="al">Trigger</div><div class="av2">Day 9 unpaid</div></div>
+        <div><div class="al">Output</div><div class="av2">PDF + Gmail</div></div>
+        <div><div class="al">Runs this month</div><div class="av2 ok">6 · all ok</div></div>
+      </div>
+      <div class="ac-b">
+        <button class="btn dk" onclick="event.stopPropagation();runAgent()">Run now</button>
+        <button class="btn" onclick="event.stopPropagation();openAgent()">Details</button>
+        <button class="btn gn" onclick="event.stopPropagation();checkTenants()">Check tenants</button>
+        <button class="btn" onclick="event.stopPropagation();nav('logs')">Logs</button>
+      </div>
+    </div>
+
+    <div class="ac live" onclick="window.open('maintenance_dashboard.html','_blank')">
+      <div class="ac-top"><div><div class="ac-n">Maintenance Triage Agent</div><div class="ac-s">AI-triages DoorLoop work orders every 30 min</div></div><div class="pill live"><div class="pdot"></div>LIVE</div></div>
+      <div class="ac-g">
+        <div><div class="al">Schedule</div><div class="av2">Every 30 min</div></div>
+        <div><div class="al">Triage</div><div class="av2">Emergency / Urgent / Standard</div></div>
+        <div><div class="al">Output</div><div class="av2">Email + Ticket</div></div>
+        <div><div class="al">Runs today</div><div class="av2 ok">48 · all ok</div></div>
+      </div>
+      <div class="ac-b">
+        <button class="btn dk" onclick="event.stopPropagation();window.open('maintenance_dashboard.html','_blank')">Open dashboard</button>
+        <button class="btn gn" onclick="event.stopPropagation();openMaintStats()">View tickets</button>
+      </div>
+    </div>
+
+  </div>
+  <div class="sh"><div class="sh-l">Coming soon</div></div>
+  <div class="agrid">
+    <div class="ac ghost"><div class="ac-top"><div><div class="ac-n">Eviction Filing Agent</div><div class="ac-s">Triggers after 3-day notice expires unpaid</div></div><div class="pill idle"><div class="pdot"></div>IDLE</div></div><div class="ac-b"><button class="btn dk" onclick="buildAgent('eviction')">Build →</button></div></div>
+    <div class="ac ghost"><div class="ac-top"><div><div class="ac-n">Lease Renewal Agent</div><div class="ac-s">Notifies 60 days before lease ends</div></div><div class="pill idle"><div class="pdot"></div>IDLE</div></div><div class="ac-b"><button class="btn dk" onclick="buildAgent('lease')">Build →</button></div></div>
+    <div class="ac ghost"><div class="ac-top"><div><div class="ac-n">Owner Report Agent</div><div class="ac-s">Monthly distribution summaries to owners</div></div><div class="pill idle"><div class="pdot"></div>IDLE</div></div><div class="ac-b"><button class="btn dk" onclick="buildAgent('owner')">Build →</button></div></div>
+    <div class="ac ghost"><div class="ac-top"><div><div class="ac-n">Tenant Screening Agent</div><div class="ac-s">Auto-runs background checks on applicants</div></div><div class="pill idle"><div class="pdot"></div>IDLE</div></div><div class="ac-b"><button class="btn dk" onclick="buildAgent('screening')">Build →</button></div></div>
+  </div>
+</div>
+
+<!-- LOGS -->
+<div class="page" id="page-logs">
+  <div class="ph"><h1>Logs</h1><p>Full run history · P Ventures agents</p></div>
+  <div class="lf">
+    <button class="lfb on" onclick="filterLog(this,'all')">All</button>
+    <button class="lfb" onclick="filterLog(this,'ok')">Success</button>
+    <button class="lfb" onclick="filterLog(this,'warn')">Warnings</button>
+    <button class="lfb" onclick="filterLog(this,'err')">Errors</button>
+  </div>
+  <div class="term">
+    <div class="th2"><div class="tdots"><div class="td td-r"></div><div class="td td-y"></div><div class="td td-g"></div></div><div class="tt">rent-notice-agent · full log</div><button class="btn" style="font-size:10px;padding:2px 8px" onclick="clearLog()">clear</button></div>
+    <div class="tb" style="max-height:400px" id="tf"></div>
+  </div>
+</div>
+
+<!-- ANALYTICS -->
+<div class="page" id="page-analytics">
+  <div class="ph"><h1>Analytics</h1><p>Agent performance · P Ventures</p></div>
+  <div class="stats" style="grid-template-columns:repeat(3,1fr)">
+    <div class="sc"><div class="sc-l">Total Runs</div><div class="sc-v b">6</div><div class="sc-s">since May 6, 2026</div></div>
+    <div class="sc"><div class="sc-l">Success Rate</div><div class="sc-v g">100%</div><div class="sc-s">0 failures</div></div>
+    <div class="sc"><div class="sc-l">Avg Runtime</div><div class="sc-v" style="color:var(--t1)">31s</div><div class="sc-s">GitHub Actions</div></div>
+  </div>
+  <div class="ach">
+    <div class="anc"><div class="an-t">Run results</div>
+      <div class="br"><div class="bl2">Success</div><div class="bb"><div class="bf" style="width:100%;background:var(--g)"></div></div><div class="bn">6</div></div>
+      <div class="br"><div class="bl2">Skipped</div><div class="bb"><div class="bf" style="width:0%;background:var(--am)"></div></div><div class="bn">0</div></div>
+      <div class="br"><div class="bl2">Errors</div><div class="bb"><div class="bf" style="width:0%;background:var(--rd)"></div></div><div class="bn">0</div></div>
+    </div>
+    <div class="anc"><div class="an-t">Notice triggers</div>
+      <div class="br"><div class="bl2">Sent</div><div class="bb"><div class="bf" style="width:0%;background:var(--bl)"></div></div><div class="bn">0</div></div>
+      <div class="br"><div class="bl2">Pending</div><div class="bb"><div class="bf" style="width:0%;background:var(--am)"></div></div><div class="bn">0</div></div>
+      <div class="br"><div class="bl2">Resolved</div><div class="bb"><div class="bf" style="width:0%;background:var(--g)"></div></div><div class="bn">0</div></div>
+    </div>
+    <div class="anc"><div class="an-t">System health</div>
+      <div class="br"><div class="bl2">Uptime</div><div class="bb"><div class="bf" style="width:100%;background:var(--g)"></div></div><div class="bn">100%</div></div>
+      <div class="br"><div class="bl2">DoorLoop</div><div class="bb"><div class="bf" style="width:100%;background:var(--g)"></div></div><div class="bn">ok</div></div>
+      <div class="br"><div class="bl2">Gmail</div><div class="bb"><div class="bf" style="width:100%;background:var(--g)"></div></div><div class="bn">ok</div></div>
+    </div>
+  </div>
+  <div class="sh"><div class="sh-l">Recent runs</div></div>
+  <div class="cbox">
+    <div class="crow"><div class="cf" style="color:var(--g);font-size:11px;font-weight:700">✓ SUCCESS</div><div class="cl"><div class="cv">May 6 2026 · 9:00am ET</div></div><div class="ca" style="font-size:10px;font-weight:600">31s · 0 notices</div><div class="ctag live">OK</div></div>
+    <div class="crow"><div class="cf" style="color:var(--g);font-size:11px;font-weight:700">✓ SUCCESS</div><div class="cl"><div class="cv">May 5 2026 · 9:00am ET</div></div><div class="ca" style="font-size:10px;font-weight:600">28s · 0 notices</div><div class="ctag live">OK</div></div>
+    <div class="crow"><div class="cf" style="color:var(--g);font-size:11px;font-weight:700">✓ SUCCESS</div><div class="cl"><div class="cv">May 4 2026 · 9:00am ET</div></div><div class="ca" style="font-size:10px;font-weight:600">30s · 0 notices</div><div class="ctag live">OK</div></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="ph"><h1>Settings</h1><p>Agent configuration · P Ventures</p></div>
+  <div class="sg">
+    <div class="setc"><div class="set-t">Rent Notice Agent</div>
+      <div class="sr"><div class="sr-l">Trigger threshold</div><div class="sr-v">Day 9</div></div>
+      <div class="sr"><div class="sr-l">Schedule</div><div class="sr-v">9:00am ET daily</div></div>
+      <div class="sr"><div class="sr-l">Late fees in notice</div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="sr"><div class="sr-l">Status</div><div class="sr-v" style="color:var(--g);background:var(--gd);border-color:var(--gb)">live</div></div>
+    </div>
+    <div class="setc"><div class="set-t">Email</div>
+      <div class="sr"><div class="sr-l">Send from</div><div class="sr-v">risingtydemgmt@gmail</div></div>
+      <div class="sr"><div class="sr-l">CC copy</div><div class="sr-v">risingtydemgmt@gmail</div></div>
+      <div class="sr"><div class="sr-l">Payment portal</div><div class="sr-v">Doorloop.com</div></div>
+    </div>
+    <div class="setc"><div class="set-t">DoorLoop API</div>
+      <div class="sr"><div class="sr-l">Connection</div><div class="sr-v" style="color:var(--g);background:var(--gd);border-color:var(--gb)">✓ connected</div></div>
+      <div class="sr"><div class="sr-l">Lease filter</div><div class="sr-v">active only</div></div>
+      <div class="sr"><div class="sr-l">Future lease guard</div><div class="tog on"></div></div>
+    </div>
+    <div class="setc"><div class="set-t">Legal</div>
+      <div class="sr"><div class="sr-l">State</div><div class="sr-v">Florida</div></div>
+      <div class="sr"><div class="sr-l">Notice type</div><div class="sr-v">FL §83.56(3)</div></div>
+      <div class="sr"><div class="sr-l">Mailing address</div><div class="sr-v">PO Box 401, RI</div></div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- AGENT DETAIL MODAL -->
+<div class="mwrap" id="m-agent">
+  <div class="modal">
+    <button class="mc" onclick="cm('m-agent')">×</button>
+    <h2>Rent Notice Agent</h2>
+    <div class="modal-sub">P Ventures · Property Management · GitHub Actions</div>
+    <div class="mr"><div class="mr-l">Status</div><div class="mr-v g">● LIVE</div></div>
+    <div class="mr"><div class="mr-l">Last run</div><div class="mr-v">May 6, 2026 · 9:00am ET</div></div>
+    <div class="mr"><div class="mr-l">Result</div><div class="mr-v g">✓ success · 31s</div></div>
+    <div class="mr"><div class="mr-l">Notices sent today</div><div class="mr-v">0</div></div>
+    <div class="mr"><div class="mr-l">Leases scanned</div><div class="mr-v">12</div></div>
+    <div class="mr"><div class="mr-l">At day-9 threshold</div><div class="mr-v">0</div></div>
+    <div class="mr"><div class="mr-l">Next run</div><div class="mr-v">May 7, 2026 · 9:00am ET</div></div>
+    <div class="mr"><div class="mr-l">GitHub repo</div><div class="mr-v b" style="cursor:pointer" onclick="window.open('https://github.com/tydepiccoli/p-ventures-rent-agent','_blank')">tydepiccoli/p-ventures-rent-agent ↗</div></div>
+    <div class="mbtns">
+      <button class="btn dk" onclick="cm('m-agent');runAgent()">Run now</button>
+      <button class="btn" onclick="cm('m-agent');nav('logs')">View logs</button>
+      <button class="btn gn" onclick="cm('m-agent');checkTenants()">Check tenants</button>
+      <button class="btn" onclick="cm('m-agent');nav('settings')">Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- RUN MODAL -->
+<div class="mwrap" id="m-run">
+  <div class="modal">
+    <button class="mc" onclick="cm('m-run')">×</button>
+    <h2 id="run-title">Running agent...</h2>
+    <div class="modal-sub" id="run-sub">Connecting to DoorLoop and scanning leases</div>
+    <div class="term" style="margin:14px 0">
+      <div class="th2"><div class="tdots"><div class="td td-r"></div><div class="td td-y"></div><div class="td td-g"></div></div><div class="tt">live output</div></div>
+      <div class="tb" style="max-height:220px" id="tr"></div>
+    </div>
+    <div class="mbtns"><button class="btn" onclick="cm('m-run')">Close</button></div>
+  </div>
+</div>
+
+<!-- TENANTS MODAL -->
+<div class="mwrap" id="m-tenants">
+  <div class="modal">
+    <button class="mc" onclick="cm('m-tenants')">×</button>
+    <h2>Tenant Status</h2>
+    <div class="modal-sub">Live data from DoorLoop · P Ventures active leases</div>
+    <div id="tc"></div>
+    <div class="mbtns" style="margin-top:14px"><button class="btn" onclick="cm('m-tenants')">Close</button></div>
+  </div>
+</div>
+
+<!-- BUILD MODAL -->
+<div class="mwrap" id="m-build">
+  <div class="modal">
+    <button class="mc" onclick="cm('m-build')">×</button>
+    <h2 id="b-title">Build Agent</h2>
+    <div class="modal-sub" id="b-sub"></div>
+    <div class="desc-box" id="b-desc"></div>
+    <div class="mbtns">
+      <button class="btn dk" id="b-cta">Start building →</button>
+      <button class="btn" onclick="cm('m-build')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DL_KEY='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiQVBJIiwiaWQiOiI2OWZiNjNkMzJhNTY5ODA2NWZjYWMwMDIiLCJleHAiOjIwOTM0NDI3NzF9.bAsq3PTzU5Smnbm-D2diFAyJ2jXS6oT0uQL_e2UKFuU';
+const REPO='tydepiccoli/p-ventures-rent-agent';
+
+const LOGS=[
+  {t:'09:00:01',k:'ok',  m:'Agent started · <b>P Ventures Rent Notice Agent</b>'},
+  {t:'09:00:02',k:'info',m:'Connecting to DoorLoop API...'},
+  {t:'09:00:03',k:'ok',  m:'Authenticated · fetching active leases'},
+  {t:'09:00:03',k:'info',m:'Page 1: <b>12 leases</b> returned'},
+  {t:'09:00:04',k:'info',m:'Scanning for day-9 non-payment threshold...'},
+  {t:'09:00:04',k:'info',m:'Checking lease start dates · blocking future leases'},
+  {t:'09:00:05',k:'ok',  m:'12 leases scanned · <b>0</b> at day-9 threshold'},
+  {t:'09:00:05',k:'ok',  m:'Run complete · Notices sent: <b>0</b> · Skipped: <b>12</b>'},
+  {t:'09:00:31',k:'ok',  m:'Rent Notice Agent finished · duration <b>31s</b>'},
+  {t:'09:30:00',k:'info',m:'Maintenance Triage Agent started'},
+  {t:'09:30:01',k:'info',m:'Fetching open work orders from DoorLoop...'},
+  {t:'09:30:02',k:'ok',  m:'0 new work orders · all previously processed'},
+  {t:'09:30:18',k:'ok',  m:'Maintenance Agent finished · duration <b>18s</b>'},
+];
+
+function rlog(id,lines){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.innerHTML=lines.map(l=>`<div class="ll"><span class="lt">${l.t}</span><span class="lk ${l.k}">${l.k.toUpperCase()}</span><span class="lm">${l.m}</span></div>`).join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+rlog('tm',LOGS);
+rlog('tf',LOGS);
+
+let currentSbRow=null;
+function nav(page,row){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('page-'+page).classList.add('on');
+  if(row){
+    if(currentSbRow)currentSbRow.classList.remove('on');
+    row.classList.add('on');
+    currentSbRow=row;
+  }
+}
+
+function om(id){document.getElementById(id).classList.add('show')}
+function cm(id){document.getElementById(id).classList.remove('show')}
+function openAgent(){om('m-agent')}
+
+document.querySelectorAll('.mwrap').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show')});
+});
+
+function runAgent(){
+  om('m-run');
+  const title=document.getElementById('run-title');
+  const sub=document.getElementById('run-sub');
+  const term=document.getElementById('tr');
+  title.textContent='Running agent...';
+  sub.textContent='Simulating daily run · connecting to DoorLoop';
+  term.innerHTML='';
+  const steps=[
+    {d:0,   k:'info',m:'Starting Rent Notice Agent...'},
+    {d:500, k:'info',m:'Connecting to DoorLoop API...'},
+    {d:1000,k:'ok',  m:'Authenticated · fetching active leases'},
+    {d:1600,k:'info',m:'Page 1: <b>12 leases</b> returned'},
+    {d:2100,k:'info',m:'Scanning leases for day-9 threshold...'},
+    {d:2600,k:'info',m:'Lease start date guard active'},
+    {d:3100,k:'ok',  m:'12 leases checked · 0 at day-9 threshold today'},
+    {d:3600,k:'ok',  m:'No notices required · run complete'},
+  ];
+  steps.forEach(s=>{
+    setTimeout(()=>{
+      const now=new Date();
+      const ts=[now.getHours(),now.getMinutes(),now.getSeconds()].map(n=>String(n).padStart(2,'0')).join(':');
+      term.innerHTML+=`<div class="ll"><span class="lt">${ts}</span><span class="lk ${s.k}">${s.k.toUpperCase()}</span><span class="lm">${s.m}</span></div>`;
+      term.scrollTop=term.scrollHeight;
+    },s.d);
+  });
+  setTimeout(()=>{
+    title.textContent='✓ Run complete';
+    sub.textContent='0 notices sent · 12 leases checked · no tenants at day-9 today';
+  },4000);
+}
+
+async function checkTenants(){
+  om('m-tenants');
+  const tc=document.getElementById('tc');
+  tc.innerHTML='<div style="text-align:center;padding:20px;font-size:11px;color:var(--t3)">Connecting to DoorLoop...</div>';
+  try{
+    const res=await fetch('https://api.doorloop.com/leases?status=active&pageSize=100',{
+      headers:{'Authorization':'Bearer '+DL_KEY,'Content-Type':'application/json'}
+    });
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const leases=data.data||[];
+    if(!leases.length){tc.innerHTML='<div style="padding:16px;font-size:12px;color:var(--t3)">No active leases found.</div>';return;}
+    const today=new Date();
+    tc.innerHTML=`<div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">${leases.length} ACTIVE LEASES</div>`+
+    leases.map(l=>{
+      const p=(l.tenants||[])[0]||{};
+      const name=((p.firstName||'')+' '+(p.lastName||'')).trim()||'Unknown';
+      const prop=(l.property||{}).name||'';
+      const unit=(l.unit||{}).name||'';
+      const rent=parseFloat(l.rent||0);
+      const startDate=l.startDate?new Date(l.startDate):null;
+      const future=startDate&&startDate>today;
+      return `<div class="tr2">
+        <div><div style="font-weight:700;color:var(--t1);font-size:12px">${name}</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:1px">${prop}${unit?' · Unit '+unit:''}</div></div>
+        <div style="text-align:right">
+          <div style="font-size:11px;font-weight:700;color:var(--t1)">$${rent.toFixed(0)}/mo</div>
+          <div style="font-size:10px;font-weight:600;color:${future?'var(--am)':'var(--g)'};margin-top:1px">${future?'⚠ future':'✓ active'}</div>
+        </div></div>`;
+    }).join('');
+  }catch(e){
+    tc.innerHTML=`<div style="background:var(--rdd);border:1px solid rgba(204,26,26,.2);border-radius:var(--rsm);padding:12px 14px;font-size:12px;margin-bottom:14px">
+      <div style="font-weight:700;color:var(--rd);margin-bottom:4px">DoorLoop API blocked by browser</div>
+      <div style="color:var(--t2);font-size:11px">DoorLoop blocks direct browser API calls (CORS policy). Your GitHub Actions agent works because it runs server-side. Below is demo data.</div></div>
+      <div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">DEMO DATA</div>`+
+    demoT();
+  }
+}
+
+function demoT(){
+  return[
+    {n:'Maria Gonzalez', p:'Sunrise Villas',u:'2B',r:1450,s:'active',d:0},
+    {n:'James Carter',   p:'Palm Court',   u:'5A',r:1200,s:'active',d:4},
+    {n:'Sandra Williams',p:'Sunrise Villas',u:'1C',r:1750,s:'active',d:0},
+    {n:'Marcus Thompson',p:'Palm Court',   u:'3D',r:1600,s:'active',d:12},
+    {n:'David Osari',    p:'Riverside Pk', u:'7F',r:1350,s:'future', d:0},
+  ].map(t=>`<div class="tr2">
+    <div><div style="font-weight:700;color:var(--t1);font-size:12px">${t.n}</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:1px">${t.p} · Unit ${t.u}${t.d>0?' · <span style="color:var(--am)">'+t.d+' days overdue</span>':''}</div></div>
+    <div style="text-align:right">
+      <div style="font-size:11px;font-weight:700;color:var(--t1)">$${t.r}/mo</div>
+      <div style="font-size:10px;font-weight:600;color:${t.s==='future'?'var(--am)':t.d>=9?'var(--rd)':'var(--g)'};margin-top:1px">${t.s==='future'?'⚠ future':t.d>=9?'⚠ day '+t.d+'overdue':'✓ active'}</div>
+    </div></div>`).join('');
+}
+
+const BINFO={
+  lease:{t:'Lease Renewal Agent',s:'Notify tenants 60 days before lease expires',d:'Checks DoorLoop daily for leases expiring within 60 days, generates a renewal offer letter PDF, and emails it to the tenant with a CC to you.'},
+  eviction:{t:'Eviction Filing Agent',s:'Triggers after 3-day notice expires unpaid',d:'Reads the audit log from the Rent Notice Agent, checks if a tenant is still unpaid after their 3-day cure period, then assembles a complete eviction package and sends it to your attorney.'},
+  maintenance:{t:'Maintenance Agent',s:'Route new DoorLoop maintenance requests automatically',d:'Monitors DoorLoop for new maintenance requests, categorizes by type (plumbing, electrical, HVAC), and dispatches to the right vendor via email. Daily summary sent to you.'},
+  owner:{t:'Owner Report Agent',s:'Monthly distribution summaries to property owners',d:'Generates a monthly PDF report for each owner showing income, expenses, distributions, and occupancy. Pulls from DoorLoop and emails automatically on the 1st.'},
+  new:{t:'New Agent',s:'Build a custom agent for any task',d:'Describe what you want to automate and it gets built. Agents can connect to DoorLoop, Gmail, Google Sheets, Slack, or any API.'},
+};
+
+function buildAgent(type){
+  const i=BINFO[type]||BINFO.new;
+  document.getElementById('b-title').textContent=i.t;
+  document.getElementById('b-sub').textContent=i.s;
+  document.getElementById('b-desc').textContent=i.d;
+  document.getElementById('b-cta').textContent='Build '+i.t+' →';
+  document.getElementById('b-cta').onclick=()=>{
+    cm('m-build');
+    alert('In the full hosted Synced app, this opens a guided agent builder for '+i.t+'.');
+  };
+  om('m-build');
+}
+
+function filterLog(btn,type){
+  document.querySelectorAll('.lfb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const lines=type==='all'?LOGS:LOGS.filter(l=>l.k===type);
+  rlog('tf',lines.length?lines:[{t:'--:--:--',k:'info',m:'No '+type+' entries'}]);
+}
+
+function clearLog(){
+  document.getElementById('tf').innerHTML='<div class="ll"><span class="lt">--:--:--</span><span class="lk info">INFO</span><span class="lm">Log cleared</span></div>';
+}
+
+function switchCo(btn){
+  document.querySelectorAll('.npill').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+function toggle(el){
+  el.classList.toggle('on');
+}
+
+function openMaintStats(){
+  const tickets=JSON.parse(localStorage.getItem('maint_tickets')||'[]');
+  const em=tickets.filter(t=>t.urgency==='Emergency'&&t.status!=='Closed').length;
+  const ur=tickets.filter(t=>t.urgency==='Urgent'&&t.status!=='Closed').length;
+  const st=tickets.filter(t=>t.urgency==='Standard'&&t.status!=='Closed').length;
+  const open=tickets.filter(t=>t.status!=='Closed').length;
+  if(!open){alert('No open maintenance tickets.\n\nOpen maintenance_dashboard.html to add tickets.');return;}
+  alert('Maintenance Tickets\n\nOpen: '+open+'\n🚨 Emergency: '+em+'\n⚡ Urgent: '+ur+'\n📋 Standard: '+st+'\n\nOpen maintenance_dashboard.html to manage.');
+}
+function addCo(){
+  alert('In the full hosted Synced app, this opens a workflow to add a new company workspace with its own agents, logs, and settings.');
+}
+</script>
+</body>
+</html>

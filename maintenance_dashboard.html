@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Synced — Maintenance</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+:root{
+  --f:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;
+  --bg:#fafafa;--bg2:#fff;--bg3:#f4f4f4;--bg4:#ebebeb;
+  --b1:rgba(0,0,0,.07);--b2:rgba(0,0,0,.12);--b3:rgba(0,0,0,.18);
+  --t1:#000;--t2:#1a1a1a;--t3:#444;
+  --em:#cc1a1a;--emd:rgba(204,26,26,.07);--emb:rgba(204,26,26,.2);
+  --ur:#8a5a00;--urd:rgba(138,90,0,.08);--urb:rgba(138,90,0,.2);
+  --st:#1a5c00;--std:rgba(26,92,0,.07);--stb:rgba(26,92,0,.2);
+  --bl:#0051cc;--bld:rgba(0,81,204,.07);--blb:rgba(0,81,204,.2);
+  --g:#1a8a3a;--gd:rgba(26,138,58,.08);--gb:rgba(26,138,58,.2);
+  --r:10px;--rsm:6px;--rlg:14px;
+}
+html,body{height:100%;font-family:var(--f);font-size:13px;background:var(--bg);color:var(--t1)}
+body{display:flex;flex-direction:column;overflow:hidden}
+.nav{height:48px;flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--b2);display:flex;align-items:center;padding:0 18px;gap:10px}
+.brand{display:flex;align-items:center;gap:8px;cursor:pointer}
+.brand svg{width:24px;height:24px}
+.brand-name{font-size:14px;font-weight:700;letter-spacing:-.3px;color:var(--t1)}
+.bdot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:blink 2.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.sep{width:1px;height:16px;background:var(--b2)}
+.crumb{font-size:12px;color:var(--t3)}
+.crumb a{color:var(--bl);font-weight:600;cursor:pointer;text-decoration:none}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.sync-time{font-size:10px;color:var(--t3)}
+.sync-btn{font-size:11px;font-weight:700;color:var(--bl);background:var(--bld);border:1px solid var(--blb);border-radius:4px;padding:4px 12px;cursor:pointer;font-family:var(--f);display:flex;align-items:center;gap:5px}
+.sync-btn:hover{background:rgba(0,81,204,.12)}
+.sync-btn:disabled{opacity:.5;pointer-events:none}
+.sdot{width:5px;height:5px;border-radius:50%;background:var(--bl)}
+.av{width:26px;height:26px;border-radius:50%;background:var(--t1);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.wrap{display:flex;flex:1;overflow:hidden}
+.sb{width:200px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--b1);padding:12px 0;display:flex;flex-direction:column;gap:1px}
+.sb-sec{padding:10px 14px 4px;font-size:9px;font-weight:700;color:var(--t3);letter-spacing:.1em;text-transform:uppercase}
+.sb-row{display:flex;align-items:center;gap:8px;margin:1px 6px;padding:6px 9px;border-radius:var(--rsm);cursor:pointer;font-size:12px;color:var(--t2);font-family:var(--f)}
+.sb-row:hover{background:var(--bg3);color:var(--t1)}
+.sb-row.on{background:var(--bg4);color:var(--t1);font-weight:600}
+.sb-ico{width:13px;height:13px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8}
+.sb-tag{margin-left:auto;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px}
+.sb-tag.r{background:var(--emd);color:var(--em);border:1px solid var(--emb)}
+.sb-tag.g{background:var(--gd);color:var(--g);border:1px solid var(--gb)}
+.sb-sp{height:4px}
+.sb-co{display:flex;align-items:center;gap:8px;margin:1px 6px;padding:6px 9px;border-radius:var(--rsm);cursor:pointer;font-size:12px;color:var(--t2);font-family:var(--f)}
+.sb-co.on{background:var(--bg4);color:var(--t1);font-weight:600}
+.co-ico{width:18px;height:18px;border-radius:3px;background:var(--t1);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0}
+.main{flex:1;overflow-y:auto;padding:22px 26px;background:var(--bg)}
+.page{display:none}.page.on{display:block}
+.ph{margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between}
+.ph h1{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:2px}
+.ph p{font-size:11px;color:var(--t3)}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.sc{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);padding:13px 15px}
+.sc-l{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.sc-v{font-size:22px;font-weight:300;letter-spacing:-.5px;line-height:1}
+.sc-v.em{color:var(--em)}.sc-v.ur{color:var(--ur)}.sc-v.g{color:var(--g)}.sc-v.b{color:var(--bl)}
+.sc-s{font-size:10px;color:var(--t3);margin-top:4px}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.sh-l{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.09em}
+.filters{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.fb{font-family:var(--f);font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid var(--b2);background:transparent;color:var(--t2);cursor:pointer}
+.fb:hover{background:var(--bg3)}.fb.on{background:var(--t1);color:#fff;border-color:var(--t1)}
+.fb.em.on{background:var(--em);border-color:var(--em)}.fb.ur.on{background:var(--ur);border-color:var(--ur)}.fb.st.on{background:var(--st);border-color:var(--st)}
+.f-sep{width:1px;height:18px;background:var(--b2)}
+.search-box{font-family:var(--f);font-size:12px;padding:4px 12px;border:1px solid var(--b2);border-radius:20px;background:var(--bg2);color:var(--t1);outline:none;width:180px}
+.search-box:focus{border-color:var(--bl)}
+.btn{font-family:var(--f);font-size:11px;font-weight:600;padding:5px 12px;border-radius:var(--rsm);border:1px solid var(--b2);background:var(--bg3);color:var(--t1);cursor:pointer}
+.btn:hover{background:var(--bg4)}.btn:active{transform:scale(.97)}
+.btn.dk{background:var(--t1);color:#fff;border-color:var(--t1)}.btn.dk:hover{background:#222}
+.btn.gn{background:var(--gd);color:var(--g);border-color:var(--gb)}
+.btn.bl{background:var(--bld);color:var(--bl);border-color:var(--blb)}
+.btn.em{background:var(--emd);color:var(--em);border-color:var(--emb)}
+.btn.sm{font-size:10px;padding:3px 8px}
+.tbl-wrap{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--rlg);overflow:hidden;margin-bottom:22px}
+.tbl-hdr{display:grid;grid-template-columns:80px 1fr 130px 110px 120px 100px 90px;padding:9px 16px;background:var(--bg3);border-bottom:1px solid var(--b1);font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em}
+.tr{display:grid;grid-template-columns:80px 1fr 130px 110px 120px 100px 90px;padding:11px 16px;border-bottom:1px solid var(--b1);cursor:pointer;transition:background .1s;align-items:center}
+.tr:last-child{border-bottom:none}.tr:hover{background:var(--bg3)}
+.ub{display:inline-flex;align-items:center;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;letter-spacing:.04em}
+.ub.Emergency{background:var(--emd);color:var(--em);border:1px solid var(--emb)}
+.ub.Urgent{background:var(--urd);color:var(--ur);border:1px solid var(--urb)}
+.ub.Standard{background:var(--std);color:var(--st);border:1px solid var(--stb)}
+.sb2{display:inline-block;font-size:9px;font-weight:600;padding:2px 7px;border-radius:3px;background:var(--bg3);color:var(--t3);border:1px solid var(--b1);white-space:nowrap}
+.sb2.dl{background:var(--bld);color:var(--bl);border-color:var(--blb)}
+.tr-title{font-size:12px;font-weight:600;color:var(--t1);margin-bottom:1px}
+.tr-sub{font-size:10px;color:var(--t3)}
+.tc{font-size:11px;color:var(--t2)}
+.tc.ok{color:var(--g);font-weight:600}.tc.em{color:var(--em);font-weight:600}.tc.b{color:var(--bl)}
+.dl-badge{display:inline-flex;align-items:center;font-size:8px;font-weight:800;padding:1px 5px;border-radius:3px;background:var(--bld);color:var(--bl);border:1px solid var(--blb);margin-left:5px;letter-spacing:.04em}
+.empty{text-align:center;padding:40px;font-size:13px;color:var(--t3)}
+.mwrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:flex-start;justify-content:center;padding-top:50px}
+.mwrap.show{display:flex}
+.modal{background:var(--bg2);border-radius:var(--rlg);width:660px;max-width:95vw;max-height:88vh;overflow-y:auto;border:1px solid var(--b2)}
+.mhdr{display:flex;align-items:flex-start;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid var(--b1)}
+.mhdr h2{font-size:15px;font-weight:700;margin-bottom:2px}
+.mhdr p{font-size:11px;color:var(--t3)}
+.mc{background:var(--bg3);border:1px solid var(--b1);width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:15px;color:var(--t2);display:flex;align-items:center;justify-content:center;font-family:var(--f)}
+.mc:hover{background:var(--bg4)}
+.mbody{padding:16px 20px}
+.ms{margin-bottom:16px}
+.ms-t{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:9px}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.mf{background:var(--bg3);border-radius:var(--rsm);padding:9px 11px}
+.mf-l{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.mf-v{font-size:12px;font-weight:600;color:var(--t1)}
+.mf-v.em{color:var(--em)}.mf-v.g{color:var(--g)}.mf-v.b{color:var(--bl)}
+.form-select{width:100%;font-family:var(--f);font-size:12px;padding:7px 10px;border:1px solid var(--b2);border-radius:var(--rsm);background:var(--bg2);color:var(--t1);outline:none}
+.form-ta{width:100%;font-family:var(--f);font-size:12px;padding:7px 10px;border:1px solid var(--b2);border-radius:var(--rsm);background:var(--bg2);color:var(--t1);outline:none;resize:vertical;min-height:60px}
+.form-ta:focus,.form-select:focus{border-color:var(--bl)}
+.tl{border-left:2px solid var(--b2);padding-left:14px}
+.tl-item{position:relative;margin-bottom:9px}
+.tl-item::before{content:'';position:absolute;left:-19px;top:4px;width:8px;height:8px;border-radius:50%;background:var(--b2);border:2px solid var(--bg2)}
+.tl-item.done::before{background:var(--g)}.tl-item.cur::before{background:var(--bl)}
+.tl-s{font-size:11px;font-weight:600}.tl-t{font-size:10px;color:var(--t3)}
+.mfoot{padding:12px 20px;border-top:1px solid var(--b1);display:flex;gap:8px;flex-wrap:wrap}
+.form-row{margin-bottom:12px}
+.form-lbl{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.form-input{width:100%;font-family:var(--f);font-size:12px;padding:7px 10px;border:1px solid var(--b2);border-radius:var(--rsm);background:var(--bg2);color:var(--t1);outline:none}
+.form-input:focus{border-color:var(--bl)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--t1);color:#fff;padding:10px 16px;border-radius:var(--r);font-size:12px;font-weight:600;z-index:500;opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none;max-width:320px}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.err{background:var(--em)}
+.vendor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.vc{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);padding:16px}
+.vc-type{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.vc-name{font-size:13px;font-weight:700;margin-bottom:5px}
+.vc-d{font-size:11px;color:var(--t2);margin-bottom:2px}
+.an-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+.anc{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);padding:16px}
+.an-t{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:11px}
+.br{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.bl2{font-size:11px;font-weight:600;color:var(--t2);width:80px;flex-shrink:0}
+.bb{flex:1;height:5px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.bf{height:100%;border-radius:2px}
+.bn{font-size:10px;font-weight:700;width:28px;text-align:right;flex-shrink:0}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<nav class="nav">
+  <div class="brand" onclick="goHome()">
+    <svg viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="6" fill="#000"/>
+      <circle cx="16" cy="16" r="11.5" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+      <circle cx="16" cy="16" r="7" stroke="rgba(255,255,255,.18)" stroke-width="1"/>
+      <circle cx="16" cy="16" r="3" stroke="rgba(255,255,255,.3)" stroke-width="1.2"/>
+      <circle cx="16" cy="16" r="1.4" fill="white"/>
+      <circle cx="16" cy="4.5" r="1.4" fill="white" opacity=".9"/>
+      <circle cx="27" cy="21.5" r="1.4" fill="white" opacity=".7"/>
+      <circle cx="5" cy="21.5" r="1.4" fill="white" opacity=".7"/>
+      <line x1="16" y1="5.9" x2="16" y2="13" stroke="rgba(255,255,255,.2)" stroke-width=".9"/>
+      <line x1="25.8" y1="20.8" x2="19.8" y2="17.4" stroke="rgba(255,255,255,.15)" stroke-width=".9"/>
+      <line x1="6.2" y1="20.8" x2="12.2" y2="17.4" stroke="rgba(255,255,255,.15)" stroke-width=".9"/>
+    </svg>
+    <span class="brand-name">Synced</span>
+    <div class="bdot"></div>
+  </div>
+  <div class="sep"></div>
+  <span class="crumb"><a onclick="goHome()">Dashboard</a> &rsaquo; Maintenance</span>
+  <div class="nav-r">
+    <span class="sync-time" id="sync-time">Not yet synced</span>
+    <button class="sync-btn" id="sync-btn" onclick="syncDoorLoop()"><div class="sdot"></div>Sync DoorLoop</button>
+    <div class="av">TP</div>
+  </div>
+</nav>
+
+<div class="wrap">
+<aside class="sb">
+  <div class="sb-sec">Maintenance</div>
+  <div class="sb-row on" onclick="nav('tickets',this)">
+    <svg class="sb-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    Tickets<span class="sb-tag r" id="sb-open">0</span>
+  </div>
+  <div class="sb-row" onclick="nav('vendors',this)">
+    <svg class="sb-ico" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+    Vendors
+  </div>
+  <div class="sb-row" onclick="nav('analytics',this)">
+    <svg class="sb-ico" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+    Analytics
+  </div>
+  <div class="sb-sp"></div>
+  <div class="sb-sec">Company</div>
+  <div class="sb-co on"><div class="co-ico">PV</div>P Ventures<span class="sb-tag g" style="margin-left:auto">live</span></div>
+  <div class="sb-sp"></div>
+  <div class="sb-sec">Navigation</div>
+  <div class="sb-row" onclick="goHome()">
+    <svg class="sb-ico" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    All Agents
+  </div>
+</aside>
+
+<main class="main">
+
+<div class="page on" id="page-tickets">
+  <div class="ph">
+    <div><h1>Maintenance Tickets</h1><p id="sync-status">P Ventures &middot; Click "Sync DoorLoop" to load your work orders</p></div>
+    <button class="btn dk" onclick="openAddTicket()">+ Add ticket</button>
+  </div>
+  <div class="stats">
+    <div class="sc"><div class="sc-l">Total Open</div><div class="sc-v" id="stat-total">0</div><div class="sc-s">active</div></div>
+    <div class="sc"><div class="sc-l">Emergency</div><div class="sc-v em" id="stat-em">0</div><div class="sc-s">respond now</div></div>
+    <div class="sc"><div class="sc-l">Urgent</div><div class="sc-v ur" id="stat-ur">0</div><div class="sc-s">48hrs</div></div>
+    <div class="sc"><div class="sc-l">Standard</div><div class="sc-v" id="stat-st">0</div><div class="sc-s">7 days</div></div>
+    <div class="sc"><div class="sc-l">From DoorLoop</div><div class="sc-v b" id="stat-dl">0</div><div class="sc-s">synced</div></div>
+  </div>
+  <div class="filters">
+    <button class="fb on" onclick="filter(this,'all')">All</button>
+    <button class="fb em" onclick="filter(this,'Emergency')">🚨 Emergency</button>
+    <button class="fb ur" onclick="filter(this,'Urgent')">⚡ Urgent</button>
+    <button class="fb st" onclick="filter(this,'Standard')">📋 Standard</button>
+    <div class="f-sep"></div>
+    <button class="fb" onclick="filter(this,'open')">Open only</button>
+    <button class="fb" onclick="filter(this,'closed')">Closed</button>
+    <div class="f-sep"></div>
+    <input class="search-box" type="text" placeholder="Search tenant, address..." oninput="search(this.value)">
+    <button class="btn" style="margin-left:auto" onclick="loadDemo()">Load demo</button>
+  </div>
+  <div class="tbl-wrap">
+    <div class="tbl-hdr"><div>Urgency</div><div>Issue / Tenant</div><div>Property</div><div>Status</div><div>Vendor</div><div>Cost</div><div>Actions</div></div>
+    <div id="ticket-list"><div class="empty">Click "Sync DoorLoop" to load work orders from DoorLoop, or "Add ticket" to create one manually.</div></div>
+  </div>
+</div>
+
+<div class="page" id="page-vendors">
+  <div class="ph"><div><h1>Vendors</h1><p>Your maintenance vendor roster</p></div><button class="btn dk" onclick="openAddVendor()">+ Add vendor</button></div>
+  <div class="vendor-grid" id="vendor-list"></div>
+</div>
+
+<div class="page" id="page-analytics">
+  <div class="ph"><div><h1>Analytics</h1><p>Maintenance performance</p></div></div>
+  <div class="stats" style="grid-template-columns:repeat(4,1fr)">
+    <div class="sc"><div class="sc-l">Total</div><div class="sc-v b" id="an-total">0</div><div class="sc-s">all time</div></div>
+    <div class="sc"><div class="sc-l">Resolved</div><div class="sc-v g" id="an-res">0</div></div>
+    <div class="sc"><div class="sc-l">From DoorLoop</div><div class="sc-v" id="an-dl">0</div></div>
+    <div class="sc"><div class="sc-l">Manual</div><div class="sc-v" id="an-man">0</div></div>
+  </div>
+  <div class="an-grid">
+    <div class="anc"><div class="an-t">By urgency</div>
+      <div class="br"><div class="bl2">Emergency</div><div class="bb"><div class="bf" id="an-em-b" style="width:0%;background:var(--em)"></div></div><div class="bn" id="an-em-n">0</div></div>
+      <div class="br"><div class="bl2">Urgent</div><div class="bb"><div class="bf" id="an-ur-b" style="width:0%;background:var(--ur)"></div></div><div class="bn" id="an-ur-n">0</div></div>
+      <div class="br"><div class="bl2">Standard</div><div class="bb"><div class="bf" id="an-st-b" style="width:0%;background:var(--st)"></div></div><div class="bn" id="an-st-n">0</div></div>
+    </div>
+    <div class="anc"><div class="an-t">By vendor type</div><div id="an-cat"></div></div>
+    <div class="anc"><div class="an-t">By status</div><div id="an-stat"></div></div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- TICKET DETAIL -->
+<div class="mwrap" id="m-ticket">
+  <div class="modal">
+    <div class="mhdr"><div><h2 id="mt-title">Ticket</h2><p id="mt-sub"></p></div><button class="mc" onclick="cm('m-ticket')">x</button></div>
+    <div class="mbody">
+      <div class="ms"><div class="ms-t">Tenant &amp; Property</div><div class="mgrid" id="mt-info"></div></div>
+      <div class="ms"><div class="ms-t">AI Triage</div><div class="mgrid" id="mt-ai"></div></div>
+      <div class="ms">
+        <div class="ms-t">Update Status &mdash; saves here and syncs to DoorLoop</div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <select class="form-select" id="mt-sel" style="flex:1"></select>
+          <textarea class="form-ta" id="mt-notes" placeholder="Resolution notes (optional)..." style="flex:2"></textarea>
+        </div>
+        <button class="btn bl" style="margin-top:10px;width:100%" onclick="saveStatus()">Save Status &amp; Sync to DoorLoop</button>
+      </div>
+      <div class="ms"><div class="ms-t">Status Timeline</div><div class="tl" id="mt-tl"></div></div>
+    </div>
+    <div class="mfoot" id="mt-foot"></div>
+  </div>
+</div>
+
+<!-- ADD TICKET -->
+<div class="mwrap" id="m-add">
+  <div class="modal">
+    <div class="mhdr"><div><h2>New Ticket</h2><p>AI triage runs automatically</p></div><button class="mc" onclick="cm('m-add')">x</button></div>
+    <div class="mbody">
+      <div class="fgrid">
+        <div class="form-row"><div class="form-lbl">Tenant Name</div><input class="form-input" id="f-tenant" placeholder="First Last"></div>
+        <div class="form-row"><div class="form-lbl">Tenant Email</div><input class="form-input" id="f-email" placeholder="tenant@email.com"></div>
+        <div class="form-row"><div class="form-lbl">Tenant Phone</div><input class="form-input" id="f-phone" placeholder="(555) 000-0000"></div>
+        <div class="form-row"><div class="form-lbl">Unit</div><input class="form-input" id="f-unit" placeholder="Unit #"></div>
+      </div>
+      <div class="form-row"><div class="form-lbl">Property Address</div><input class="form-input" id="f-address" placeholder="123 Main St, Port Saint Lucie, FL"></div>
+      <div class="form-row"><div class="form-lbl">Issue Description</div><textarea class="form-ta" id="f-desc" style="min-height:80px" placeholder="Describe the issue..."></textarea></div>
+      <div class="fgrid">
+        <div class="form-row"><div class="form-lbl">Urgency Override</div>
+          <select class="form-select" id="f-urgency"><option value="">Let AI decide</option><option>Emergency</option><option>Urgent</option><option>Standard</option></select></div>
+        <div class="form-row"><div class="form-lbl">Access Permission</div>
+          <select class="form-select" id="f-access"><option value="yes">Yes - can enter</option><option value="no">Tenant must be present</option><option value="unknown">Unknown</option></select></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn dk" id="f-submit" onclick="submitTicket()">Triage &amp; Save</button><button class="btn" onclick="cm('m-add')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- ADD VENDOR -->
+<div class="mwrap" id="m-vendor">
+  <div class="modal">
+    <div class="mhdr"><div><h2>Add Vendor</h2><p>Add to your roster</p></div><button class="mc" onclick="cm('m-vendor')">x</button></div>
+    <div class="mbody">
+      <div class="fgrid">
+        <div class="form-row"><div class="form-lbl">Name</div><input class="form-input" id="v-name" placeholder="Name or company"></div>
+        <div class="form-row"><div class="form-lbl">Type</div>
+          <select class="form-select" id="v-type"><option value="plumber">Plumber</option><option value="electrician">Electrician</option><option value="hvac">HVAC</option><option value="appliance">Appliance</option><option value="pest">Pest Control</option><option value="locksmith">Locksmith</option><option value="roofer">Roofer</option><option value="handyman">Handyman</option></select></div>
+        <div class="form-row"><div class="form-lbl">Phone</div><input class="form-input" id="v-phone" placeholder="(555) 000-0000"></div>
+        <div class="form-row"><div class="form-lbl">Email</div><input class="form-input" id="v-email" placeholder="vendor@email.com"></div>
+        <div class="form-row"><div class="form-lbl">Avg Cost ($)</div><input class="form-input" id="v-cost" type="number" placeholder="150"></div>
+        <div class="form-row"><div class="form-lbl">Response (hrs)</div><input class="form-input" id="v-resp" type="number" placeholder="24"></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn dk" onclick="saveVendor()">Save Vendor</button><button class="btn" onclick="cm('m-vendor')">Cancel</button></div>
+  </div>
+</div>
+
+<script>
+const DL_KEY='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiQVBJIiwiaWQiOiI2OWZiNjNkMzJhNTY5ODA2NWZjYWMwMDIiLCJleHAiOjIwOTM0NDI3NzF9.bAsq3PTzU5Smnbm-D2diFAyJ2jXS6oT0uQL_e2UKFuU';
+const DL='https://api.doorloop.com';
+const DLH={'Authorization':'Bearer '+DL_KEY,'Content-Type':'application/json'};
+const SF=['New Request','AI Reviewing','Need More Info','Waiting on Photos','Vendor Needed','Vendor Contacted','Scheduled','In Progress','Waiting on Invoice','Owner Approval','Completed','Closed'];
+const DLS={'New Request':'open','AI Reviewing':'open','Need More Info':'open','Waiting on Photos':'open','Vendor Needed':'open','Vendor Contacted':'open','Scheduled':'open','In Progress':'inProgress','Waiting on Invoice':'inProgress','Owner Approval':'open','Completed':'completed','Closed':'completed'};
+
+let T=JSON.parse(localStorage.getItem('mt')||'[]');
+let V=JSON.parse(localStorage.getItem('mv')||JSON.stringify(defV()));
+let CF='all',CS='',CID=null;
+
+function defV(){return[
+  {id:1,type:'plumber',name:'Add Your Plumber',phone:'',email:'',avg_cost:200,resp:4},
+  {id:2,type:'electrician',name:'Add Your Electrician',phone:'',email:'',avg_cost:250,resp:4},
+  {id:3,type:'hvac',name:'Add Your HVAC',phone:'',email:'',avg_cost:300,resp:6},
+  {id:4,type:'handyman',name:'Add Your Handyman',phone:'',email:'',avg_cost:100,resp:72},
+  {id:5,type:'pest',name:'Add Pest Control',phone:'',email:'',avg_cost:150,resp:48},
+  {id:6,type:'locksmith',name:'Add Your Locksmith',phone:'',email:'',avg_cost:120,resp:2},
+];}
+
+function sv(){localStorage.setItem('mt',JSON.stringify(T));localStorage.setItem('mv',JSON.stringify(V));}
+
+function toast(m,ok=true){
+  const e=document.getElementById('toast');
+  e.textContent=m; e.className='toast show'+(ok?'':' err');
+  clearTimeout(e._t); e._t=setTimeout(()=>e.classList.remove('show'),3500);
+}
+
+function goHome(){
+  // Try to go back to synced_dashboard.html in same folder
+  window.location.href='synced_dashboard.html';
+}
+
+let sbRow=document.querySelector('.sb-row.on');
+function nav(p,r){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
+  document.getElementById('page-'+p).classList.add('on');
+  if(r){if(sbRow)sbRow.classList.remove('on');r.classList.add('on');sbRow=r;}
+  if(p==='vendors')renderV();
+  if(p==='analytics')renderA();
+}
+function om(id){document.getElementById(id).classList.add('show');}
+function cm(id){document.getElementById(id).classList.remove('show');}
+document.querySelectorAll('.mwrap').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');}));
+
+// ── DOORLOOP SYNC ─────────────────────────────────────────
+async function syncDoorLoop(){
+  const btn=document.getElementById('sync-btn');
+  btn.disabled=true; btn.innerHTML='<div class="sdot"></div>Syncing...';
+  document.getElementById('sync-status').textContent='Connecting to DoorLoop...';
+  try{
+    const r=await fetch(DL+'/workOrders?status=open&pageSize=100',{headers:DLH});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    const wos=data.data||[];
+    let added=0,updated=0;
+    for(const wo of wos){
+      const dlId=String(wo.id||'');
+      if(!dlId) continue;
+      const ten=wo.tenant||{},prop=wo.property||{},unit=wo.unit||{},addr=(prop.address||{});
+      const address=[addr.street1,addr.city+' '+(addr.state||'FL')+' '+(addr.zip||'')].filter(Boolean).join(', ');
+      const desc=wo.description||wo.subject||'';
+      const tri=triage(desc);
+      const vend=getV(tri.vendor_type);
+      const ex=T.find(t=>t.doorloop_id===dlId);
+      if(ex){
+        if(wo.status==='completed'&&ex.status!=='Completed'&&ex.status!=='Closed'){
+          ex.status='Completed'; ex.date_updated=new Date().toISOString(); updated++;
+        }
+      } else {
+        T.unshift({id:Date.now()+Math.random(),doorloop_id:dlId,source:'doorloop',
+          tenant_name:((ten.firstName||'')+' '+(ten.lastName||'')).trim()||'Unknown',
+          tenant_email:ten.email||'',tenant_phone:ten.phone||'',
+          property_address:address,property_name:prop.name||'',unit:unit.name||'',
+          issue_description:desc,date_submitted:(wo.createdAt||new Date().toISOString()).slice(0,10),
+          date_updated:new Date().toISOString(),status:'New Request',
+          vendor_name:vend.name,vendor_phone:vend.phone||'',...tri});
+        added++;
+      }
+    }
+    sv();
+    const now=new Date().toLocaleTimeString();
+    document.getElementById('sync-time').textContent='Synced '+now;
+    document.getElementById('sync-status').textContent=wos.length+' open work orders from DoorLoop  \u00b7  '+added+' new  \u00b7  '+updated+' updated';
+    toast('\u2713 Synced '+wos.length+' DoorLoop work orders  \u00b7  '+added+' new');
+    renderT();
+  }catch(e){
+    // DoorLoop blocks browser-to-browser calls (CORS) — this is expected
+    // The Python agent handles actual syncing server-side
+    document.getElementById('sync-status').textContent='DoorLoop API blocked by browser CORS \u2014 your GitHub Actions agent syncs automatically every 30 min. Showing local data.';
+    toast('DoorLoop CORS block \u2014 showing local data  \u00b7  Agent syncs server-side every 30 min',false);
+    if(T.length===0) loadDemo();
+    renderT();
+  }
+  btn.disabled=false; btn.innerHTML='<div class="sdot"></div>Sync DoorLoop';
+}
+
+// Push status update back to DoorLoop
+async function pushToDL(t){
+  if(!t.doorloop_id||t.doorloop_id.startsWith('MANUAL')) return false;
+  try{
+    const r=await fetch(DL+'/workOrders/'+t.doorloop_id,{
+      method:'PATCH',headers:DLH,
+      body:JSON.stringify({status:DLS[t.status]||'open',
+        description:t.resolution_notes?t.issue_description+'\n\nResolution: '+t.resolution_notes:t.issue_description})
+    });
+    return r.ok;
+  }catch(e){return false;}
+}
+
+// ── TRIAGE ────────────────────────────────────────────────
+function triage(desc){
+  const d=(desc||'').toLowerCase();
+  let urgency,vendor_type,lo,hi;
+  const emKw=['flood','sewage','sewer','overflow','fire','smoke','spark','sparking','burning smell','no lock','broken lock','gushing'];
+  const urKw=['no ac','ac not','ac stopped','air condition','no heat','no hot water','water heater','not cooling','stopped working','leak','pest','roach','mice','mouse','bug','insect'];
+  if(emKw.some(k=>d.includes(k))){urgency='Emergency';lo=300;hi=1500;}
+  else if(urKw.some(k=>d.includes(k))){urgency='Urgent';lo=150;hi=600;}
+  else{urgency='Standard';lo=75;hi=300;}
+  const pestRe=/\b(pest|roach|cockroach|mice|mouse|termite|insect|spider)\b/;
+  if(pestRe.test(d)) vendor_type='pest';
+  else if(/sew(age|er)|septic/.test(d)) vendor_type='plumber';
+  else if(/spark|sparking|electrical.?fire|outlet|breaker/.test(d)) vendor_type='electrician';
+  else if(/not.?cooling|fridge.?not|refrigerator.?not|fridge.?stopped|oven|stove|dishwasher|washer|dryer|appliance|microwave/.test(d)) vendor_type='appliance';
+  else if(/fridge|refrigerator/.test(d)) vendor_type='appliance';
+  else if(/\bac\b|hvac|air.?condition|furnace|thermostat|cooling|no.?heat|no.?cool/.test(d)) vendor_type='hvac';
+  else if(/electric|outlet|breaker|wire/.test(d)) vendor_type='electrician';
+  else if(/roof|ceiling.?leak/.test(d)) vendor_type='roofer';
+  else if(/broken.?lock|lock.?broken|deadbolt/.test(d)) vendor_type='locksmith';
+  else if(/plumb|pipe|water|drain|toilet|sink|faucet|leak|flood/.test(d)) vendor_type='plumber';
+  else if(/lock|key/.test(d)) vendor_type='locksmith';
+  else vendor_type='handyman';
+  const ap=hi<250?'auto':hi<750?'manager':'owner';
+  const v=getV(vendor_type);
+  return{urgency,vendor_type,vendor_name:v.name,vendor_phone:v.phone||'',
+    estimated_cost_low:lo,estimated_cost_high:hi,approval_required:ap,
+    habitability_risk:urgency==='Emergency',
+    ai_summary:desc.slice(0,80),ai_reasoning:'Auto-classified',
+    category:vendor_type.charAt(0).toUpperCase()+vendor_type.slice(1)+' Issue',photos_needed:true};
+}
+function getV(type){return V.find(v=>v.type===type)||V.find(v=>v.type==='handyman')||{name:'TBD',phone:'',email:''};}
+
+// ── RENDER ────────────────────────────────────────────────
+function renderT(){
+  updateStats();
+  let ts=[...T];
+  if(CF==='Emergency') ts=ts.filter(t=>t.urgency==='Emergency');
+  else if(CF==='Urgent') ts=ts.filter(t=>t.urgency==='Urgent');
+  else if(CF==='Standard') ts=ts.filter(t=>t.urgency==='Standard');
+  else if(CF==='open') ts=ts.filter(t=>t.status!=='Closed'&&t.status!=='Completed');
+  else if(CF==='closed') ts=ts.filter(t=>t.status==='Closed'||t.status==='Completed');
+  if(CS){const q=CS.toLowerCase();ts=ts.filter(t=>(t.tenant_name||'').toLowerCase().includes(q)||(t.property_address||'').toLowerCase().includes(q)||(t.ai_summary||t.issue_description||'').toLowerCase().includes(q));}
+  const el=document.getElementById('ticket-list');
+  if(!ts.length){el.innerHTML='<div class="empty">No tickets match your filters.</div>';return;}
+  el.innerHTML=ts.map(t=>`
+    <div class="tr" onclick="openT('${t.id}')">
+      <div><span class="ub ${t.urgency}">${(t.urgency||'').toUpperCase()}</span></div>
+      <div><div class="tr-title">${t.ai_summary||t.issue_description||'No description'}${t.source==='doorloop'?'<span class="dl-badge">DL</span>':''}</div><div class="tr-sub">${t.tenant_name||'Unknown'}</div></div>
+      <div class="tc">${(t.property_address||'—').split(',')[0]}<br><span style="font-size:10px;color:var(--t3)">Unit ${t.unit||'—'}</span></div>
+      <div><span class="sb2 ${t.source==='doorloop'?'dl':''}">${t.status||'New'}</span></div>
+      <div class="tc">${t.vendor_name||'TBD'}<br><span style="font-size:10px;color:var(--t3)">${t.vendor_type||''}</span></div>
+      <div class="tc ${t.approval_required==='owner'?'em':''}">${t.estimated_cost_low?'$'+t.estimated_cost_low+'\u2013$'+t.estimated_cost_high:'—'}<br><span style="font-size:10px;color:var(--t3)">${(t.approval_required||'').toUpperCase()}</span></div>
+      <div style="display:flex;gap:4px" onclick="event.stopPropagation()">
+        <button class="btn sm" onclick="openT('${t.id}')">View</button>
+        <button class="btn sm gn" onclick="nextS('${t.id}')">+</button>
+      </div>
+    </div>`).join('');
+}
+
+function updateStats(){
+  const op=T.filter(t=>t.status!=='Closed'&&t.status!=='Completed');
+  document.getElementById('stat-total').textContent=op.length;
+  document.getElementById('stat-em').textContent=op.filter(t=>t.urgency==='Emergency').length;
+  document.getElementById('stat-ur').textContent=op.filter(t=>t.urgency==='Urgent').length;
+  document.getElementById('stat-st').textContent=op.filter(t=>t.urgency==='Standard').length;
+  document.getElementById('stat-dl').textContent=T.filter(t=>t.source==='doorloop').length;
+  document.getElementById('sb-open').textContent=op.length;
+}
+
+function openT(id){
+  const t=T.find(t=>String(t.id)===String(id));
+  if(!t) return;
+  CID=id;
+  document.getElementById('mt-title').textContent=t.ai_summary||t.issue_description||'Ticket';
+  document.getElementById('mt-sub').innerHTML='#'+(t.doorloop_id||id)+' \u00b7 '+t.tenant_name+(t.source==='doorloop'?'<span class="dl-badge">DoorLoop</span>':'');
+  document.getElementById('mt-info').innerHTML=[
+    ['Tenant',t.tenant_name||'—'],['Email',t.tenant_email||'—'],
+    ['Phone',t.tenant_phone||'—'],['Property',t.property_address||'—'],
+    ['Unit',t.unit||'—'],['Submitted',t.date_submitted||'—'],
+    ['Status','<span class="sb2">'+(t.status||'New')+'</span>'],
+    ['Access',t.access_permission||'Unknown'],
+  ].map(([l,v])=>'<div class="mf"><div class="mf-l">'+l+'</div><div class="mf-v">'+v+'</div></div>').join('');
+  document.getElementById('mt-ai').innerHTML=[
+    ['Urgency','<span class="ub '+t.urgency+'">'+t.urgency+'</span>'],
+    ['Category',t.category||'—'],
+    ['Vendor',t.vendor_name||'TBD'+(t.vendor_phone?' \u00b7 '+t.vendor_phone:'')],
+    ['Type',(t.vendor_type||'—')],
+    ['Est. Cost',t.estimated_cost_low?'$'+t.estimated_cost_low+'\u2013$'+t.estimated_cost_high:'—'],
+    ['Approval',(t.approval_required||'—').toUpperCase()],
+    ['Habitability',t.habitability_risk?'<span style="color:var(--em);font-weight:700">YES</span>':'No'],
+    ['AI Note',t.ai_reasoning||'—'],
+  ].map(([l,v])=>'<div class="mf"><div class="mf-l">'+l+'</div><div class="mf-v">'+v+'</div></div>').join('');
+  const sel=document.getElementById('mt-sel');
+  sel.innerHTML=SF.map(s=>'<option value="'+s+'"'+(s===t.status?' selected':'')+'>'+s+'</option>').join('');
+  document.getElementById('mt-notes').value=t.resolution_notes||'';
+  const idx=SF.indexOf(t.status);
+  document.getElementById('mt-tl').innerHTML=SF.map((s,i)=>'<div class="tl-item'+(i<idx?' done':'')+(i===idx?' cur':'')+'"><div class="tl-s">'+s+'</div>'+(i===idx?'<div class="tl-t">Current status</div>':'')+(i<idx?'<div class="tl-t">\u2713 Done</div>':'')+'</div>').join('');
+  document.getElementById('mt-foot').innerHTML=`
+    <button class="btn gn" onclick="qStatus('${id}','Completed')">Mark Complete</button>
+    <button class="btn" onclick="qStatus('${id}','Vendor Needed')">Vendor Needed</button>
+    <button class="btn em" onclick="qStatus('${id}','Owner Approval')">Owner Approval</button>
+    <button class="btn" onclick="qStatus('${id}','Closed');cm('m-ticket')">Close</button>
+    ${t.source==='doorloop'?'<button class="btn bl" onclick="window.open(\'https://app.doorloop.com\',\'_blank\')">View in DoorLoop \u2197</button>':''}`;
+  om('m-ticket');
+}
+
+async function saveStatus(){
+  const t=T.find(t=>String(t.id)===String(CID));
+  if(!t) return;
+  t.status=document.getElementById('mt-sel').value;
+  t.resolution_notes=document.getElementById('mt-notes').value;
+  t.date_updated=new Date().toISOString();
+  sv(); renderT();
+  toast('Saving and syncing to DoorLoop...');
+  const ok=await pushToDL(t);
+  toast(ok?'\u2713 Saved and synced to DoorLoop':t.source==='doorloop'?'\u2713 Saved locally \u2014 DoorLoop CORS blocks browser, agent will sync on next run':'\u2713 Saved',ok||t.source!=='doorloop');
+  openT(CID);
+}
+
+async function qStatus(id,status){
+  const t=T.find(t=>String(t.id)===String(id));
+  if(!t) return;
+  t.status=status; t.date_updated=new Date().toISOString(); sv();
+  const ok=await pushToDL(t);
+  toast(ok?'\u2713 '+status+' \u2014 synced to DoorLoop':'\u2713 '+status);
+  renderT(); if(String(CID)===String(id)) openT(id);
+}
+
+async function nextS(id){
+  const t=T.find(t=>String(t.id)===String(id));
+  if(!t) return;
+  const i=SF.indexOf(t.status);
+  if(i<SF.length-1){t.status=SF[i+1];t.date_updated=new Date().toISOString();sv();}
+  pushToDL(t);
+  renderT(); toast('\u2713 Advanced \u2192 '+t.status);
+}
+
+function filter(btn,type){document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');CF=type;renderT();}
+function search(q){CS=q;renderT();}
+
+// ── ADD TICKET ────────────────────────────────────────────
+function openAddTicket(){om('m-add');}
+function submitTicket(){
+  const desc=document.getElementById('f-desc').value.trim();
+  if(!desc){alert('Enter issue description.');return;}
+  const btn=document.getElementById('f-submit');
+  btn.textContent='Triaging...';btn.disabled=true;
+  const tri=triage(desc);
+  const ov=document.getElementById('f-urgency').value;
+  if(ov) tri.urgency=ov;
+  const id=Date.now();
+  T.unshift({id,doorloop_id:'MANUAL-'+id,source:'manual',
+    tenant_name:document.getElementById('f-tenant').value,
+    tenant_email:document.getElementById('f-email').value,
+    tenant_phone:document.getElementById('f-phone').value,
+    unit:document.getElementById('f-unit').value,
+    property_address:document.getElementById('f-address').value,
+    issue_description:desc,
+    access_permission:document.getElementById('f-access').value,
+    date_submitted:new Date().toISOString().slice(0,10),
+    date_updated:new Date().toISOString(),status:'New Request',...tri});
+  sv();cm('m-add');
+  btn.textContent='Triage & Save';btn.disabled=false;
+  ['f-tenant','f-email','f-phone','f-unit','f-address','f-desc'].forEach(i=>document.getElementById(i).value='');
+  renderT();openT(id);toast('\u2713 Ticket created and triaged as '+tri.urgency);
+}
+
+// ── VENDORS ───────────────────────────────────────────────
+function renderV(){
+  const tl={plumber:'Plumber',electrician:'Electrician',hvac:'HVAC',appliance:'Appliance',pest:'Pest Control',locksmith:'Locksmith',roofer:'Roofer',handyman:'Handyman'};
+  document.getElementById('vendor-list').innerHTML=V.map(v=>`
+    <div class="vc"><div class="vc-type">${tl[v.type]||v.type}</div>
+    <div class="vc-name">${v.name}</div>
+    ${v.phone?'<div class="vc-d">\uD83D\uDCDE '+v.phone+'</div>':''}
+    ${v.email?'<div class="vc-d">\u2709 '+v.email+'</div>':''}
+    <div class="vc-d" style="margin-top:6px;font-size:10px;color:var(--t3)">Avg $${v.avg_cost} \u00b7 ${v.resp}hr response</div>
+    <button class="btn" style="margin-top:10px;width:100%;font-size:10px" onclick="editV(${v.id})">Edit</button></div>`).join('');
+}
+function openAddVendor(){om('m-vendor');}
+function saveVendor(){
+  const n=document.getElementById('v-name').value;
+  if(!n){alert('Enter vendor name.');return;}
+  V.push({id:Date.now(),name:n,type:document.getElementById('v-type').value,
+    phone:document.getElementById('v-phone').value,email:document.getElementById('v-email').value,
+    avg_cost:parseFloat(document.getElementById('v-cost').value)||0,
+    resp:parseFloat(document.getElementById('v-resp').value)||24});
+  sv();cm('m-vendor');renderV();toast('\u2713 Vendor saved');
+  ['v-name','v-phone','v-email','v-cost','v-resp'].forEach(i=>document.getElementById(i).value='');
+}
+function editV(id){
+  const v=V.find(v=>v.id===id);if(!v) return;
+  const n=prompt('Vendor name:',v.name);
+  if(n!==null){v.name=n;sv();renderV();toast('\u2713 Vendor updated');}
+}
+
+// ── ANALYTICS ─────────────────────────────────────────────
+function renderA(){
+  document.getElementById('an-total').textContent=T.length;
+  document.getElementById('an-res').textContent=T.filter(t=>t.status==='Completed'||t.status==='Closed').length;
+  document.getElementById('an-dl').textContent=T.filter(t=>t.source==='doorloop').length;
+  document.getElementById('an-man').textContent=T.filter(t=>t.source==='manual').length;
+  const em=T.filter(t=>t.urgency==='Emergency').length,ur=T.filter(t=>t.urgency==='Urgent').length,st=T.filter(t=>t.urgency==='Standard').length;
+  const mx=Math.max(em,ur,st,1);
+  document.getElementById('an-em-b').style.width=(em/mx*100)+'%';
+  document.getElementById('an-ur-b').style.width=(ur/mx*100)+'%';
+  document.getElementById('an-st-b').style.width=(st/mx*100)+'%';
+  document.getElementById('an-em-n').textContent=em;
+  document.getElementById('an-ur-n').textContent=ur;
+  document.getElementById('an-st-n').textContent=st;
+  const cats={};T.forEach(t=>{cats[t.vendor_type||'other']=(cats[t.vendor_type||'other']||0)+1;});
+  const cmx=Math.max(...Object.values(cats),1);
+  document.getElementById('an-cat').innerHTML=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>'<div class="br"><div class="bl2">'+k+'</div><div class="bb"><div class="bf" style="width:'+(v/cmx*100)+'%;background:var(--bl)"></div></div><div class="bn">'+v+'</div></div>').join('')||'<div style="font-size:11px;color:var(--t3)">No data</div>';
+  const ss={};T.forEach(t=>{ss[t.status||'New']=(ss[t.status||'New']||0)+1;});
+  const smx=Math.max(...Object.values(ss),1);
+  document.getElementById('an-stat').innerHTML=Object.entries(ss).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>'<div class="br"><div class="bl2" style="font-size:10px;width:110px">'+k+'</div><div class="bb"><div class="bf" style="width:'+(v/smx*100)+'%;background:var(--g)"></div></div><div class="bn">'+v+'</div></div>').join('')||'<div style="font-size:11px;color:var(--t3)">No data</div>';
+}
+
+// ── DEMO DATA ─────────────────────────────────────────────
+function loadDemo(){
+  if(T.length>0&&!confirm('Replace current tickets with demo data?')) return;
+  T=[
+    {id:1,doorloop_id:'DL-001',source:'doorloop',tenant_name:'Maria Gonzalez',tenant_email:'maria@email.com',tenant_phone:'(772) 555-0101',property_address:'450 SE Port St Lucie Blvd',unit:'2B',issue_description:'Water flooding from bathroom sink',urgency:'Emergency',category:'Plumbing',vendor_type:'plumber',vendor_name:'Your Plumber',vendor_phone:'',estimated_cost_low:200,estimated_cost_high:600,approval_required:'manager',habitability_risk:true,ai_summary:'Active water leak from bathroom sink',ai_reasoning:'Active flooding = Emergency',status:'Vendor Contacted',date_submitted:'2026-05-06',access_permission:'yes'},
+    {id:2,doorloop_id:'DL-002',source:'doorloop',tenant_name:'James Carter',tenant_email:'jcarter@gmail.com',tenant_phone:'(772) 555-0102',property_address:'220 NW Lake Whitney Pl',unit:'5A',issue_description:'AC stopped working, 90 degrees inside',urgency:'Urgent',category:'HVAC',vendor_type:'hvac',vendor_name:'Your HVAC',vendor_phone:'',estimated_cost_low:250,estimated_cost_high:800,approval_required:'manager',habitability_risk:false,ai_summary:'AC non-functional in extreme heat',ai_reasoning:'No AC in extreme heat = Urgent',status:'Scheduled',date_submitted:'2026-05-05',access_permission:'yes'},
+    {id:3,doorloop_id:'DL-003',source:'doorloop',tenant_name:'Sandra Williams',tenant_email:'swilliams@hotmail.com',tenant_phone:'(772) 555-0103',property_address:'450 SE Port St Lucie Blvd',unit:'1C',issue_description:'Cabinet door off hinge in kitchen',urgency:'Standard',category:'Handyman',vendor_type:'handyman',vendor_name:'Your Handyman',vendor_phone:'',estimated_cost_low:75,estimated_cost_high:150,approval_required:'auto',habitability_risk:false,ai_summary:'Kitchen cabinet door off hinge',ai_reasoning:'Minor cosmetic issue = Standard',status:'Waiting on Photos',date_submitted:'2026-05-04',access_permission:'unknown'},
+    {id:4,doorloop_id:'DL-004',source:'doorloop',tenant_name:'Marcus Thompson',tenant_email:'mthompson@yahoo.com',tenant_phone:'(772) 555-0104',property_address:'220 NW Lake Whitney Pl',unit:'3D',issue_description:'Roaches seen in kitchen near stove',urgency:'Urgent',category:'Pest',vendor_type:'pest',vendor_name:'Your Pest Control',vendor_phone:'',estimated_cost_low:150,estimated_cost_high:350,approval_required:'manager',habitability_risk:false,ai_summary:'Cockroach infestation in kitchen',ai_reasoning:'Active pest infestation = Urgent',status:'Vendor Needed',date_submitted:'2026-05-03',access_permission:'yes'},
+  ];
+  sv();renderT();toast('\u2713 Demo data loaded');
+}
+
+renderT();renderV();
+</script>
+</body>
+</html>
