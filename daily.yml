@@ -1,0 +1,38 @@
+name: Daily Rent Notice Agent
+
+on:
+  schedule:
+    - cron: "0 13 * * *"   # 9:00 AM ET (UTC-4 in summer)
+  workflow_dispatch:        # Run manually from GitHub Actions tab
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests reportlab
+
+      - name: Run agent
+        env:
+          GMAIL_ADDRESS:      ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          NOTIFY_EMAIL:       ${{ secrets.NOTIFY_EMAIL }}
+        run: python rent_notice_agent.py
+        # Note: signature.png must be committed to the repo root alongside rent_notice_agent.py
+
+      - name: Upload audit log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-log-${{ github.run_id }}
+          path: notice_audit_log.jsonl
+          if-no-files-found: ignore
+          retention-days: 90
